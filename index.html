@@ -371,7 +371,7 @@ select option{background:#060a18;}
     <div class="card-title">⚙️ Connexion</div>
     <div class="fg" style="margin-bottom:10px;">
       <label>URL Apps Script Web App</label>
-      <input type="text" id="gs-url-input" value="https://script.google.com/macros/s/AKfycbyDuhaIaP4rw81OEsOwJI_6LlJqdAQeW6hnA2_WNdlSZn5YTGdiTdoWYuk_sg0UZE9rTw/exec">
+      <input type="text" id="gs-url-input" value="https://script.google.com/macros/s/AKfycbwyA-wVYo4oArbSE-QYkqgcChUHiXIRVFjxr3umWi2KJ5J_SvoOwZSjAcz-podDN7h3iw/exec">
     </div>
     <div class="fg" style="margin-bottom:14px;">
       <label>ID Google Spreadsheet</label>
@@ -598,7 +598,7 @@ select option{background:#060a18;}
 /* ════════════════════════════════════════
    CONFIG
 ════════════════════════════════════════ */
-const GS_URL = 'https://script.google.com/macros/s/AKfycbw8OtXvHlkb1HuqS9VYJtTWi3tmu0EILnksGlDpb-5_j8qqGuS1vKkzMpgmQUxnJc347w/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbyDuhaIaP4rw81OEsOwJI_6LlJqdAQeW6hnA2_WNdlSZn5YTGdiTdoWYuk_sg0UZE9rTw/exec';
 const SS_ID  = '1-We6Ne5-41bPOrhjzEyMPXfWbU0Ny5_mI93jTVjCWpA';
 const EVENT  = new Date('2026-04-04T00:00:00');
 
@@ -667,7 +667,7 @@ async function fullLoad() {
       autoQty: String(r['AutoQty']).toUpperCase() === 'OUI',
       prix:    parseFloat(r['Prix MGA'])||0,
       where:   r['Où acheter']  || r['Ou acheter'] || '',
-      due:     r['Échéance']    || r['Echeance'] || '',
+      due:     parseDate(r['Échéance'] || r['Echeance'] || ''),
       done:    String(r['Fait']).toUpperCase() === 'OUI',
     }));
 
@@ -758,6 +758,18 @@ const confirmedP2 = ()=> confirmed()+2;
 function getQty(it){return it.autoQty ? confirmedP2()+' pcs' : it.qty||'—';}
 function catEmoji(c){return {'Vaisselle jetable':'🍽️','Menu Buffet':'🍖','Boissons':'🥤','Gâteau & Desserts':'🎂','Décoration':'🎨','Matériel de fête':'🎊','Tâches':'✅','Divers':'📦'}[c]||'📦';}
 function today(){const d=new Date();d.setHours(0,0,0,0);return d;}
+// Normalise n'importe quel format de date recu de Sheets -> "YYYY-MM-DD"
+// Gere : "2026-03-28", "2026-03-27T21:00:00.000Z" (decalage UTC), objets Date
+function parseDate(raw) {
+  if(!raw) return '';
+  if(typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const d = new Date(raw);
+  if(isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
 function daysLeft(due){if(!due)return null;const d=new Date(due+'T00:00:00');d.setHours(0,0,0,0);return Math.round((d-today())/864e5);}
 
 /* ════════════════════════════════════════
